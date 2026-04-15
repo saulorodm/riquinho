@@ -19,8 +19,8 @@ function toNumber(value: unknown) {
   return Number(value ?? 0);
 }
 
-export async function listInvestments(_request: Request, response: Response) {
-  const user = await getCurrentUser();
+export async function listInvestments(request: Request, response: Response) {
+  const user = await getCurrentUser(request);
   await syncUserInvestmentQuotes(user.id);
   const investments = await prisma.investment.findMany({
     where: { userId: user.id },
@@ -38,7 +38,7 @@ export async function listInvestments(_request: Request, response: Response) {
 
 export async function createInvestment(request: Request, response: Response) {
   const payload = investmentContributionPayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
   const quotaBased = isQuotaBased(payload.assetType);
   const contributionAmount = quotaBased
     ? Number((payload.quantity! * payload.unitPrice!).toFixed(2))
@@ -155,7 +155,7 @@ export async function createInvestment(request: Request, response: Response) {
 export async function updateInvestment(request: Request, response: Response) {
   const investmentId = String(request.params.id);
   const payload = investmentPositionUpdatePayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
   const existingInvestment = await prisma.investment.findFirstOrThrow({
     where: {
       id: investmentId,
@@ -229,7 +229,7 @@ export async function updateInvestment(request: Request, response: Response) {
 
 export async function deleteInvestment(request: Request, response: Response) {
   const investmentId = String(request.params.id);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
 
   await prisma.investment.deleteMany({
     where: {

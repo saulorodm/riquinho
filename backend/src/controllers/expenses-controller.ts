@@ -8,8 +8,8 @@ import { getCurrentUser } from "../services/user-service.js";
 import { serializePrisma } from "../utils/serialize.js";
 import { expensePayloadSchema } from "../validators/expense-validator.js";
 
-export async function listExpenses(_request: Request, response: Response) {
-  const user = await getCurrentUser();
+export async function listExpenses(request: Request, response: Response) {
+  const user = await getCurrentUser(request);
   const expenses = await prisma.expense.findMany({
     where: { userId: user.id },
     include: {
@@ -27,7 +27,7 @@ export async function listExpenses(_request: Request, response: Response) {
 
 export async function createExpense(request: Request, response: Response) {
   const payload = expensePayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
   const purchaseDate = new Date(payload.purchaseDate);
   const cycle =
     payload.financialCycleId
@@ -80,7 +80,7 @@ export async function createExpense(request: Request, response: Response) {
 export async function updateExpense(request: Request, response: Response) {
   const expenseId = String(request.params.id);
   const payload = expensePayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
   const purchaseDate = new Date(payload.purchaseDate);
   const existingExpense = await prisma.expense.findFirstOrThrow({
     where: {
@@ -144,7 +144,7 @@ export async function updateExpense(request: Request, response: Response) {
 
 export async function deleteExpense(request: Request, response: Response) {
   const expenseId = String(request.params.id);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
 
   await prisma.expense.deleteMany({
     where: {

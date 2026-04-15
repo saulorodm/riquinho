@@ -222,3 +222,22 @@ export interface MonthlyControlData {
     financialCycle?: FinancialCycle | null;
   }>;
 }
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AuthStatus {
+  hasUser: boolean;
+  hasConfiguredUser: boolean;
+  needsBootstrap: boolean;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: AuthUser;
+}

@@ -7,8 +7,8 @@ import { getCurrentUser } from "../services/user-service.js";
 import { serializePrisma } from "../utils/serialize.js";
 import { incomePayloadSchema } from "../validators/income-validator.js";
 
-export async function listIncome(_request: Request, response: Response) {
-  const user = await getCurrentUser();
+export async function listIncome(request: Request, response: Response) {
+  const user = await getCurrentUser(request);
   const incomeEntries = await prisma.income.findMany({
     where: { userId: user.id },
     include: {
@@ -23,7 +23,7 @@ export async function listIncome(_request: Request, response: Response) {
 
 export async function createIncome(request: Request, response: Response) {
   const payload = incomePayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
   const receivedAt = new Date(payload.receivedAt);
   const cycle =
     payload.financialCycleId
@@ -54,7 +54,7 @@ export async function createIncome(request: Request, response: Response) {
 export async function updateIncome(request: Request, response: Response) {
   const incomeId = String(request.params.id);
   const payload = incomePayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
   const receivedAt = new Date(payload.receivedAt);
   const existingIncome = await prisma.income.findFirstOrThrow({
     where: {
@@ -90,7 +90,7 @@ export async function updateIncome(request: Request, response: Response) {
 
 export async function deleteIncome(request: Request, response: Response) {
   const incomeId = String(request.params.id);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
 
   await prisma.income.deleteMany({
     where: {

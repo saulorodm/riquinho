@@ -6,8 +6,8 @@ import { getCurrentUser } from "../services/user-service.js";
 import { serializePrisma } from "../utils/serialize.js";
 import { assetPayloadSchema } from "../validators/assets-validator.js";
 
-export async function listAssets(_request: Request, response: Response) {
-  const user = await getCurrentUser();
+export async function listAssets(request: Request, response: Response) {
+  const user = await getCurrentUser(request);
   const assets = await prisma.asset.findMany({
     where: { userId: user.id },
     orderBy: { acquiredAt: "desc" }
@@ -18,7 +18,7 @@ export async function listAssets(_request: Request, response: Response) {
 
 export async function createAsset(request: Request, response: Response) {
   const payload = assetPayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
 
   const asset = await prisma.asset.create({
     data: {
@@ -38,7 +38,7 @@ export async function createAsset(request: Request, response: Response) {
 export async function updateAsset(request: Request, response: Response) {
   const assetId = String(request.params.id);
   const payload = assetPayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
   const existingAsset = await prisma.asset.findFirstOrThrow({
     where: {
       id: assetId,
@@ -63,7 +63,7 @@ export async function updateAsset(request: Request, response: Response) {
 
 export async function deleteAsset(request: Request, response: Response) {
   const assetId = String(request.params.id);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
 
   await prisma.asset.deleteMany({
     where: {

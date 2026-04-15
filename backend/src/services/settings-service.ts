@@ -1,9 +1,11 @@
+import type { Request } from "express";
+
 import { prisma } from "../config/prisma.js";
 import { serializePrisma } from "../utils/serialize.js";
 import { getCurrentUser } from "./user-service.js";
 
-export async function getSettings() {
-  const user = await getCurrentUser();
+export async function getSettings(request: Request) {
+  const user = await getCurrentUser(request);
 
   return serializePrisma({
     cycleStartDay: user.cycleStartDay,
@@ -12,8 +14,11 @@ export async function getSettings() {
   });
 }
 
-export async function updateSettings(payload: { cycleStartDay: number; cycleEndDay: number }) {
-  const user = await getCurrentUser();
+export async function updateSettings(
+  request: Request,
+  payload: { cycleStartDay: number; cycleEndDay: number }
+) {
+  const user = await getCurrentUser(request);
 
   const updatedUser = await prisma.user.update({
     where: { id: user.id },

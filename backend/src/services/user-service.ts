@@ -1,22 +1,13 @@
+import type { Request } from "express";
+
 import { prisma } from "../config/prisma.js";
 
-export async function getCurrentUser() {
-  const existingUser = await prisma.user.findFirst({
-    orderBy: {
-      createdAt: "asc"
-    }
-  });
-
-  if (existingUser) {
-    return existingUser;
+export async function getCurrentUser(request: Request) {
+  if (!request.authUserId) {
+    throw new Error("Authenticated user not found in request");
   }
 
-  return prisma.user.create({
-    data: {
-      name: "Usuário Principal",
-      email: "owner@riquinho.local",
-      cycleStartDay: 21,
-      cycleEndDay: 20
-    }
+  return prisma.user.findUniqueOrThrow({
+    where: { id: request.authUserId }
   });
 }

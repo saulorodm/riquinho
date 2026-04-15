@@ -6,8 +6,8 @@ import { getCurrentUser } from "../services/user-service.js";
 import { serializePrisma } from "../utils/serialize.js";
 import { categoryPayloadSchema } from "../validators/category-validator.js";
 
-export async function listCategories(_request: Request, response: Response) {
-  const user = await getCurrentUser();
+export async function listCategories(request: Request, response: Response) {
+  const user = await getCurrentUser(request);
   const categories = await prisma.category.findMany({
     where: { userId: user.id },
     orderBy: [{ type: "asc" }, { name: "asc" }]
@@ -18,7 +18,7 @@ export async function listCategories(_request: Request, response: Response) {
 
 export async function createCategory(request: Request, response: Response) {
   const payload = categoryPayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
 
   const category = await prisma.category.create({
     data: {
@@ -33,7 +33,7 @@ export async function createCategory(request: Request, response: Response) {
 export async function updateCategory(request: Request, response: Response) {
   const categoryId = String(request.params.id);
   const payload = categoryPayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
   const existingCategory = await prisma.category.findFirstOrThrow({
     where: {
       id: categoryId,
@@ -51,7 +51,7 @@ export async function updateCategory(request: Request, response: Response) {
 
 export async function deleteCategory(request: Request, response: Response) {
   const categoryId = String(request.params.id);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
 
   await prisma.category.deleteMany({
     where: {

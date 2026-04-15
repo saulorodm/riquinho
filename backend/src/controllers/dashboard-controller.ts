@@ -11,7 +11,7 @@ function toNumber(value: unknown) {
 }
 
 export async function getDashboard(request: Request, response: Response) {
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
   await syncUserInvestmentQuotes(user.id);
   const requestedCycleId =
     typeof request.query.cycleId === "string" && request.query.cycleId.length > 0

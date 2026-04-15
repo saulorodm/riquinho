@@ -1,7 +1,6 @@
 import type { User } from "@prisma/client";
 
 import { prisma } from "../config/prisma.js";
-import { getCurrentUser } from "./user-service.js";
 
 function getUtcDate(year: number, month: number, day: number, endOfDay = false) {
   const safeDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
@@ -189,9 +188,4 @@ export async function getAvailableCycles(userId: string) {
     },
     orderBy: { startDate: "desc" }
   });
-}
-
-export async function getCurrentUserCycle() {
-  const user = await getCurrentUser();
-  return getCurrentCycle(user.id);
 }

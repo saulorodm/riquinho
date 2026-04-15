@@ -6,8 +6,8 @@ import { getCurrentUser } from "../services/user-service.js";
 import { serializePrisma } from "../utils/serialize.js";
 import { financialCyclePayloadSchema } from "../validators/cycle-validator.js";
 
-export async function listCycles(_request: Request, response: Response) {
-  const user = await getCurrentUser();
+export async function listCycles(request: Request, response: Response) {
+  const user = await getCurrentUser(request);
   const cycles = await prisma.financialCycle.findMany({
     where: { userId: user.id },
     orderBy: { startDate: "desc" }
@@ -18,7 +18,7 @@ export async function listCycles(_request: Request, response: Response) {
 
 export async function createCycle(request: Request, response: Response) {
   const payload = financialCyclePayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
 
   const cycle = await prisma.financialCycle.create({
     data: {

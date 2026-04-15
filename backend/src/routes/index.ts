@@ -2,6 +2,12 @@ import { Router } from "express";
 
 import { createAsset, deleteAsset, listAssets, updateAsset } from "../controllers/assets-controller.js";
 import {
+  bootstrapAuth,
+  getAuthStatus,
+  loginAuth,
+  readAuthMe
+} from "../controllers/auth-controller.js";
+import {
   createCategory,
   deleteCategory,
   listCategories,
@@ -28,10 +34,18 @@ import {
   listLoans,
   toggleLoanInstallment
 } from "../controllers/loans-controller.js";
+import { requireAuth } from "../middlewares/auth-middleware.js";
 import { readSettings, saveSettings } from "../controllers/settings-controller.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
 export const apiRouter = Router();
+
+apiRouter.get("/auth/status", asyncHandler(getAuthStatus));
+apiRouter.post("/auth/bootstrap", asyncHandler(bootstrapAuth));
+apiRouter.post("/auth/login", asyncHandler(loginAuth));
+apiRouter.get("/auth/me", requireAuth, asyncHandler(readAuthMe));
+
+apiRouter.use(requireAuth);
 
 apiRouter.get("/dashboard", asyncHandler(getDashboard));
 

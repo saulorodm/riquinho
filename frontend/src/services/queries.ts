@@ -2,6 +2,9 @@ import { api } from "./api";
 import type {
   AppSettings,
   Asset,
+  AuthResponse,
+  AuthStatus,
+  AuthUser,
   Category,
   DashboardData,
   Expense,
@@ -11,6 +14,30 @@ import type {
   Loan,
   MonthlyControlData
 } from "../types/api";
+
+export async function fetchAuthStatus() {
+  const { data } = await api.get<AuthStatus>("/auth/status");
+  return data;
+}
+
+export async function bootstrapAuth(payload: {
+  name: string;
+  email: string;
+  password: string;
+}) {
+  const { data } = await api.post<AuthResponse>("/auth/bootstrap", payload);
+  return data;
+}
+
+export async function loginAuth(payload: { email: string; password: string }) {
+  const { data } = await api.post<AuthResponse>("/auth/login", payload);
+  return data;
+}
+
+export async function fetchAuthMe() {
+  const { data } = await api.get<{ user: AuthUser }>("/auth/me");
+  return data.user;
+}
 
 export async function fetchDashboard(cycleId?: string) {
   const { data } = await api.get<DashboardData>("/dashboard", {

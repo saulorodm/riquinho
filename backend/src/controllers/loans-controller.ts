@@ -49,8 +49,8 @@ function splitInstallments(principalAmount: number, installmentsCount: number) {
   });
 }
 
-export async function listLoans(_request: Request, response: Response) {
-  const user = await getCurrentUser();
+export async function listLoans(request: Request, response: Response) {
+  const user = await getCurrentUser(request);
   const loans = await prisma.loan.findMany({
     where: { userId: user.id },
     include: {
@@ -66,7 +66,7 @@ export async function listLoans(_request: Request, response: Response) {
 
 export async function createLoan(request: Request, response: Response) {
   const payload = loanPayloadSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
   const startDate = new Date(payload.startDate);
   const installments = splitInstallments(payload.principalAmount, payload.installmentsCount);
   const dueDates = buildInstallmentDates(startDate, payload.dueDay, payload.installmentsCount);
@@ -102,7 +102,7 @@ export async function createLoan(request: Request, response: Response) {
 
 export async function deleteLoan(request: Request, response: Response) {
   const loanId = String(request.params.id);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
 
   await prisma.loan.deleteMany({
     where: {
@@ -117,7 +117,7 @@ export async function deleteLoan(request: Request, response: Response) {
 export async function toggleLoanInstallment(request: Request, response: Response) {
   const installmentId = String(request.params.installmentId);
   const payload = loanInstallmentStatusSchema.parse(request.body);
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(request);
 
   const installment = await prisma.loanInstallment.findFirstOrThrow({
     where: {

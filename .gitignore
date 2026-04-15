@@ -8,3 +8,5 @@ coverage
 backend/generated
 backend/prisma/dev.db
 backend/prisma/dev.db-journal
+frontend/tsconfig.tsbuildinfo
+supabase/.temp

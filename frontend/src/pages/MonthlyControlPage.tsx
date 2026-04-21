@@ -413,82 +413,6 @@ export function MonthlyControlPage() {
       </Panel>
 
       <Panel
-        title="Extrato do ciclo"
-        subtitle="Lançamentos do mais recente para o mais antigo"
-        icon={WalletCards}
-        iconColor="#7dd3fc"
-        tone="neutral"
-      >
-        <div className="space-y-3">
-          {timelineItems.length > 0 ? (
-            timelineItems.map((item) => {
-              const category = getCategoryPresentation(item.category);
-              const isIncome = item.type === "income";
-
-              return (
-                <article key={item.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                            isIncome
-                              ? "border border-sky-300/20 bg-sky-300/10 text-sky-200"
-                              : "border border-sky-300/20 bg-sky-300/10 text-sky-200"
-                          }`}
-                      >
-                          {isIncome ? "Entrou" : "Saiu"}
-                      </span>
-                        {!isIncome ? (
-                          <span
-                            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                              item.expenseKind === "EXTRAORDINARY"
-                                ? "border border-sky-300/20 bg-sky-300/10 text-sky-200"
-                                : item.expenseKind === "PATRIMONIAL"
-                                  ? "border border-sky-300/20 bg-sky-300/10 text-sky-200"
-                                  : "border border-sky-300/20 bg-sky-300/10 text-sky-200"
-                            }`}
-                          >
-                            {item.expenseKind === "EXTRAORDINARY"
-                              ? "Extraordinário"
-                              : item.expenseKind === "PATRIMONIAL"
-                                ? "Patrimonial"
-                                : "Operacional"}
-                          </span>
-                        ) : null}
-                        <span className="text-xs text-slate-500">{formatDate(item.occurredAt)}</span>
-                      </div>
-
-                      <p className="font-medium text-white">{item.title}</p>
-
-                      <span
-                        className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-                        style={{
-                          backgroundColor: `${category.color}22`,
-                          color: category.color
-                        }}
-                      >
-                        {category.label}
-                      </span>
-                    </div>
-
-                    <p className="text-lg font-semibold text-sky-300">
-                      {formatCurrencyValue(item.amount)}
-                    </p>
-                  </div>
-                </article>
-              );
-            })
-          ) : (
-            <EmptyState
-              title="Nenhum lançamento no ciclo"
-              description="Cadastre despesas ou receitas dentro desse período para visualizar o extrato."
-            />
-          )}
-        </div>
-      </Panel>
-
-      <Panel
         title="Gastos por categoria"
         subtitle="Quanto saiu em cada categoria dentro do ciclo selecionado"
         icon={ChartColumnBig}
@@ -541,6 +465,69 @@ export function MonthlyControlPage() {
             <EmptyState
               title="Nenhum gasto por categoria"
               description="As categorias aparecerão aqui quando houver despesas lançadas neste ciclo."
+            />
+          )}
+        </div>
+      </Panel>
+
+      <Panel
+        title="Extrato do ciclo"
+        subtitle="Lançamentos do mais recente para o mais antigo"
+        icon={WalletCards}
+        iconColor="#7dd3fc"
+        tone="neutral"
+      >
+        <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+          {timelineItems.length > 0 ? (
+            timelineItems.map((item) => {
+              const category = getCategoryPresentation(item.category);
+              const isIncome = item.type === "income";
+
+              return (
+                <article key={item.id} className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center rounded-full border border-sky-300/20 bg-sky-300/10 px-2.5 py-0.5 text-[11px] font-semibold text-sky-200">
+                          {isIncome ? "Entrou" : "Saiu"}
+                        </span>
+                        {!isIncome ? (
+                          <span className="inline-flex items-center rounded-full border border-sky-300/20 bg-sky-300/10 px-2.5 py-0.5 text-[11px] font-medium text-sky-200">
+                            {item.expenseKind === "EXTRAORDINARY"
+                              ? "Extraordinário"
+                              : item.expenseKind === "PATRIMONIAL"
+                                ? "Patrimonial"
+                                : "Operacional"}
+                          </span>
+                        ) : null}
+                        <span className="text-[11px] text-slate-500">{formatDate(item.occurredAt)}</span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-medium text-white">{item.title}</p>
+                        <span
+                          className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+                          style={{
+                            backgroundColor: `${category.color}22`,
+                            color: category.color
+                          }}
+                        >
+                          {category.label}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="shrink-0 text-sm font-semibold text-sky-300">
+                      {formatCurrencyValue(item.amount)}
+                    </p>
+                  </div>
+                </article>
+              );
+            })
+          ) : (
+            <EmptyState
+              title="Nenhum lançamento no ciclo"
+              description="Cadastre despesas ou receitas dentro desse período para visualizar o extrato."
             />
           )}
         </div>

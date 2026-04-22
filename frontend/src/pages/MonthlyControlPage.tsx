@@ -484,11 +484,29 @@ export function MonthlyControlPage() {
               const isIncome = item.type === "income";
 
               return (
-                <article key={item.id} className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
+                <article
+                  key={item.id}
+                  className={`rounded-2xl px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${
+                    isIncome
+                      ? "border border-emerald-400/12 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(15,23,42,0.18))]"
+                      : "border border-rose-400/12 bg-[linear-gradient(135deg,rgba(244,63,94,0.12),rgba(15,23,42,0.18))]"
+                  }`}
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center rounded-full border border-sky-300/20 bg-sky-300/10 px-2.5 py-0.5 text-[11px] font-semibold text-sky-200">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                            isIncome
+                              ? "border border-emerald-300/20 bg-emerald-300/10 text-emerald-200"
+                              : "border border-rose-300/20 bg-rose-300/10 text-rose-200"
+                          }`}
+                        >
+                          {isIncome ? (
+                            <ArrowDownCircle className="h-3.5 w-3.5" />
+                          ) : (
+                            <ArrowUpCircle className="h-3.5 w-3.5" />
+                          )}
                           {isIncome ? "Entrou" : "Saiu"}
                         </span>
                         {!isIncome ? (
@@ -504,6 +522,17 @@ export function MonthlyControlPage() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${
+                            isIncome ? "bg-emerald-300/12 text-emerald-200" : "bg-rose-300/12 text-rose-200"
+                          }`}
+                        >
+                          {isIncome ? (
+                            <ArrowDownCircle className="h-4 w-4" />
+                          ) : (
+                            <ArrowUpCircle className="h-4 w-4" />
+                          )}
+                        </span>
                         <p className="text-sm font-medium text-white">{item.title}</p>
                         <span
                           className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium"
@@ -517,7 +546,11 @@ export function MonthlyControlPage() {
                       </div>
                     </div>
 
-                    <p className="shrink-0 text-sm font-semibold text-sky-300">
+                    <p
+                      className={`shrink-0 text-sm font-semibold ${
+                        isIncome ? "text-emerald-300" : "text-rose-300"
+                      }`}
+                    >
                       {formatCurrencyValue(item.amount)}
                     </p>
                   </div>

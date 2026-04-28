@@ -486,10 +486,10 @@ export function MonthlyControlPage() {
               return (
                 <article
                   key={item.id}
-                  className={`rounded-2xl px-3 py-2.5 ring-1 ring-inset shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${
+                  className={`rounded-2xl px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${
                     isIncome
-                      ? "border-transparent ring-emerald-400/10 bg-[linear-gradient(135deg,rgba(16,185,129,0.10),rgba(15,23,42,0.18))]"
-                      : "border-transparent ring-rose-400/10 bg-[linear-gradient(135deg,rgba(244,63,94,0.10),rgba(15,23,42,0.18))]"
+                      ? "border border-emerald-400/12 bg-[linear-gradient(135deg,rgba(16,185,129,0.10),rgba(15,23,42,0.18))]"
+                      : "border border-rose-400/12 bg-[linear-gradient(135deg,rgba(244,63,94,0.08),rgba(15,23,42,0.18))]"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -510,7 +510,7 @@ export function MonthlyControlPage() {
                           {isIncome ? "Entrou" : "Saiu"}
                         </span>
                         {!isIncome ? (
-                          <span className="inline-flex items-center rounded-full border border-sky-300/20 bg-sky-300/10 px-2.5 py-0.5 text-[11px] font-medium text-sky-200">
+                          <span className="inline-flex items-center rounded-full border border-rose-300/20 bg-rose-300/10 px-2.5 py-0.5 text-[11px] font-medium text-rose-200">
                             {item.expenseKind === "EXTRAORDINARY"
                               ? "Extraordinário"
                               : item.expenseKind === "PATRIMONIAL"

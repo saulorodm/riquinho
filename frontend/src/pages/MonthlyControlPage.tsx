@@ -489,7 +489,7 @@ export function MonthlyControlPage() {
                   className={`rounded-2xl px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${
                     isIncome
                       ? "border border-emerald-400/12 bg-[linear-gradient(135deg,rgba(16,185,129,0.10),rgba(15,23,42,0.18))]"
-                      : "border border-rose-400/12 bg-[linear-gradient(135deg,rgba(244,63,94,0.08),rgba(15,23,42,0.18))]"
+                      : "ring-1 ring-inset ring-rose-500/12 bg-[linear-gradient(135deg,rgba(127,29,29,0.16),rgba(15,23,42,0.22))]"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -510,7 +510,7 @@ export function MonthlyControlPage() {
                           {isIncome ? "Entrou" : "Saiu"}
                         </span>
                         {!isIncome ? (
-                          <span className="inline-flex items-center rounded-full border border-rose-300/20 bg-rose-300/10 px-2.5 py-0.5 text-[11px] font-medium text-rose-200">
+                          <span className="inline-flex items-center rounded-full border border-rose-500/14 bg-rose-500/8 px-2.5 py-0.5 text-[11px] font-medium text-rose-100">
                             {item.expenseKind === "EXTRAORDINARY"
                               ? "Extraordinário"
                               : item.expenseKind === "PATRIMONIAL"

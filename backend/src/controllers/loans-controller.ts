@@ -6,24 +6,32 @@ import { getCurrentUser } from "../services/user-service.js";
 import { serializePrisma } from "../utils/serialize.js";
 import { loanInstallmentStatusSchema, loanPayloadSchema } from "../validators/loans-validator.js";
 
-function buildInstallmentDates(startDate: Date, dueDay: number, installmentsCount: number) {
+function buildInstallmentDates(firstInstallmentDate: Date, dueDay: number, installmentsCount: number) {
   const dates: Date[] = [];
-  let year = startDate.getUTCFullYear();
-  let month = startDate.getUTCMonth();
+  let year = firstInstallmentDate.getUTCFullYear();
+  let month = firstInstallmentDate.getUTCMonth();
 
-  const firstMonthLastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-  const firstMonthSafeDay = Math.min(dueDay, firstMonthLastDay);
-  const firstDueDate = new Date(Date.UTC(year, month, firstMonthSafeDay, 0, 0, 0, 0));
+  dates.push(
+    new Date(
+      Date.UTC(
+        year,
+        month,
+        firstInstallmentDate.getUTCDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    )
+  );
 
-  if (firstDueDate < startDate) {
-    month += 1;
-    if (month > 11) {
-      month = 0;
-      year += 1;
-    }
+  month += 1;
+  if (month > 11) {
+    month = 0;
+    year += 1;
   }
 
-  for (let index = 0; index < installmentsCount; index += 1) {
+  for (let index = 1; index < installmentsCount; index += 1) {
     const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
     const safeDay = Math.min(dueDay, lastDayOfMonth);
     dates.push(new Date(Date.UTC(year, month, safeDay, 0, 0, 0, 0)));
@@ -68,19 +76,25 @@ export async function createLoan(request: Request, response: Response) {
   const payload = loanPayloadSchema.parse(request.body);
   const user = await getCurrentUser(request);
   const startDate = new Date(payload.startDate);
+  const firstInstallmentDate = new Date(payload.firstInstallmentDate);
   const installments = splitInstallments(payload.principalAmount, payload.installmentsCount);
-  const dueDates = buildInstallmentDates(startDate, payload.dueDay, payload.installmentsCount);
+  const dueDates = buildInstallmentDates(firstInstallmentDate, payload.dueDay, payload.installmentsCount);
   const installmentAmount = installments[0] ?? payload.principalAmount;
 
   const loan = await prisma.loan.create({
     data: {
-      userId: user.id,
+      user: {
+        connect: {
+          id: user.id
+        }
+      },
       borrowerName: payload.borrowerName,
       principalAmount: payload.principalAmount,
       installmentAmount,
       dueDay: payload.dueDay,
       installmentsCount: payload.installmentsCount,
       startDate,
+      firstInstallmentDate,
       notes: payload.notes,
       installments: {
         create: installments.map((amount, index) => ({

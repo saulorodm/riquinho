@@ -51,6 +51,7 @@ export function LoansPage() {
     principalAmount: "",
     dueDay: "",
     startDate: getTodayDateInputValue(),
+    firstInstallmentDate: getTodayDateInputValue(),
     installmentsCount: ""
   });
 
@@ -85,6 +86,7 @@ export function LoansPage() {
       principalAmount: "",
       dueDay: "",
       startDate: getTodayDateInputValue(),
+      firstInstallmentDate: getTodayDateInputValue(),
       installmentsCount: ""
     });
   }
@@ -126,6 +128,11 @@ export function LoansPage() {
       return;
     }
 
+    if (!form.firstInstallmentDate) {
+      setFormError("Informe a data da primeira parcela.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -134,6 +141,7 @@ export function LoansPage() {
         principalAmount: Number(form.principalAmount) / 100,
         dueDay: Number(form.dueDay),
         startDate: new Date(form.startDate).toISOString(),
+        firstInstallmentDate: new Date(form.firstInstallmentDate).toISOString(),
         installmentsCount: Number(form.installmentsCount)
       });
 
@@ -239,6 +247,17 @@ export function LoansPage() {
                 required
               />
               <Field
+                label="Primeira parcela"
+                type="date"
+                value={form.firstInstallmentDate}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, firstInstallmentDate: event.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-4 md:grid-cols-1">
+              <Field
                 label="Número de parcelas"
                 type="number"
                 min={1}
@@ -284,7 +303,8 @@ export function LoansPage() {
                         <div>
                           <p className="font-medium text-white">{loan.borrowerName}</p>
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-400">
-                            <span>{formatDate(loan.startDate)}</span>
+                            <span>Empréstimo em {formatDate(loan.startDate)}</span>
+                            <span>1a parcela em {formatDate(loan.firstInstallmentDate)}</span>
                             <span>{loan.installmentsCount} parcelas</span>
                             <span>Dia {loan.dueDay}</span>
                           </div>

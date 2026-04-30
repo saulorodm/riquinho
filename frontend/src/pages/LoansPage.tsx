@@ -39,6 +39,10 @@ function getTodayDateInputValue() {
   return new Date(now.getTime() - timezoneOffsetInMs).toISOString().slice(0, 10);
 }
 
+function getSafeLoanFirstInstallmentDate(loan: Loan) {
+  return loan.firstInstallmentDate ?? loan.installments[0]?.dueDate ?? loan.startDate;
+}
+
 export function LoansPage() {
   const { formatCurrencyValue } = useValueVisibility();
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -304,7 +308,7 @@ export function LoansPage() {
                           <p className="font-medium text-white">{loan.borrowerName}</p>
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-400">
                             <span>Empréstimo em {formatDate(loan.startDate)}</span>
-                            <span>1a parcela em {formatDate(loan.firstInstallmentDate)}</span>
+                            <span>1a parcela em {formatDate(getSafeLoanFirstInstallmentDate(loan))}</span>
                             <span>{loan.installmentsCount} parcelas</span>
                             <span>Dia {loan.dueDay}</span>
                           </div>

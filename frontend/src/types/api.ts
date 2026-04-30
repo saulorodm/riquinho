@@ -133,7 +133,7 @@ export interface Loan {
   dueDay: number;
   installmentsCount: number;
   startDate: string;
-  firstInstallmentDate: string;
+  firstInstallmentDate?: string;
   notes?: string | null;
   createdAt?: string;
   updatedAt?: string;

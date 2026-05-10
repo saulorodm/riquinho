@@ -15,11 +15,12 @@ import { SelectField } from "../components/SelectField";
 import {
   createExpense,
   deleteExpense,
+  fetchDashboard,
   fetchCategories,
   fetchExpenses,
   updateExpense
 } from "../services/queries";
-import type { Category, Expense, ExpenseKind, PaymentMethod } from "../types/api";
+import type { Category, DashboardData, Expense, ExpenseKind, PaymentMethod } from "../types/api";
 import { categoryIconMap } from "../utils/category-icon-registry";
 import { expenseCategoryMeta } from "../utils/expense-category-meta";
 import { formatCurrency, formatDate, formatEnumLabel } from "../utils/format";
@@ -88,10 +89,51 @@ function getExpenseCategoryPresentation(category: Category) {
   };
 }
 
+function getCycleInstallmentsForExpense(
+  expense: Expense,
+  cycle: DashboardData["cycle"] | null
+) {
+  if (!cycle) {
+    return [];
+  }
+
+  return expense.installments.filter((installment) => installment.financialCycle?.id === cycle.id);
+}
+
+function getExpenseDisplayAmount(expense: Expense, cycle: DashboardData["cycle"] | null) {
+  const cycleInstallments = getCycleInstallmentsForExpense(expense, cycle);
+
+  if (expense.paymentMethod === "CREDIT_CARD_INSTALLMENTS" && cycleInstallments.length > 0) {
+    return cycleInstallments.reduce((sum, installment) => sum + installment.amount, 0);
+  }
+
+  return expense.amount;
+}
+
+function getCurrentCycleInstallmentLabel(
+  expense: Expense,
+  cycle: DashboardData["cycle"] | null
+) {
+  const cycleInstallments = getCycleInstallmentsForExpense(expense, cycle);
+
+  if (expense.paymentMethod !== "CREDIT_CARD_INSTALLMENTS" || cycleInstallments.length === 0) {
+    return null;
+  }
+
+  const [firstInstallment] = cycleInstallments;
+
+  if (!firstInstallment) {
+    return null;
+  }
+
+  return `${firstInstallment.installmentNumber}/${expense.installmentsCount}`;
+}
+
 export function ExpensesPage() {
   const { formatCurrencyValue } = useValueVisibility();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -133,9 +175,14 @@ export function ExpensesPage() {
   async function loadData() {
     setLoading(true);
     try {
-      const [expenseData, categoryData] = await Promise.all([fetchExpenses(), fetchCategories()]);
+      const [expenseData, categoryData, dashboardResponse] = await Promise.all([
+        fetchExpenses(),
+        fetchCategories(),
+        fetchDashboard()
+      ]);
       setExpenses(expenseData);
       setCategories(categoryData.filter((category) => category.type === "EXPENSE"));
+      setDashboardData(dashboardResponse);
     } finally {
       setLoading(false);
     }
@@ -393,7 +440,14 @@ export function ExpensesPage() {
         <Panel title="Últimos lançamentos" subtitle="Lista completa das despesas registradas">
           <div className="space-y-3">
             {expenses.length > 0 ? (
-              expenses.map((expense) => (
+              expenses.map((expense) => {
+                const displayAmount = getExpenseDisplayAmount(expense, dashboardData?.cycle ?? null);
+                const currentInstallmentLabel = getCurrentCycleInstallmentLabel(
+                  expense,
+                  dashboardData?.cycle ?? null
+                );
+
+                return (
                 <article key={expense.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
@@ -429,6 +483,11 @@ export function ExpensesPage() {
                         </span>
                         <span>{formatDate(expense.purchaseDate)}</span>
                         <span>{formatEnumLabel(expense.paymentMethod)}</span>
+                        {currentInstallmentLabel ? (
+                          <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-200">
+                            Parcela {currentInstallmentLabel}
+                          </span>
+                        ) : null}
                         {expense.isRecurring ? (
                           <span className="inline-flex items-center rounded-full border border-sky-300/20 bg-sky-300/10 px-3 py-1 text-xs font-medium text-sky-200">
                             Recorrente
@@ -438,7 +497,12 @@ export function ExpensesPage() {
                     </div>
                     <div className="flex items-center justify-between gap-4 md:min-w-[190px] md:justify-end">
                       <div className="text-left md:text-right">
-                      <p className="text-lg font-semibold text-white">{formatCurrencyValue(expense.amount)}</p>
+                      <p className="text-lg font-semibold text-white">{formatCurrencyValue(displayAmount)}</p>
+                      {currentInstallmentLabel ? (
+                        <p className="mt-1 text-xs text-slate-400">
+                          Total da compra: {formatCurrency(expense.amount)}
+                        </p>
+                      ) : null}
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -461,7 +525,8 @@ export function ExpensesPage() {
                     </div>
                   </div>
                 </article>
-              ))
+              );
+              })
             ) : (
               <EmptyState
                 title="Nenhuma despesa registrada"

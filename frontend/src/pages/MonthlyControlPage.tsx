@@ -92,18 +92,25 @@ export function MonthlyControlPage() {
 
   const activeCycle = dashboardData?.cycle ?? null;
 
-  const cycleExpenses = useMemo(() => {
+  const cycleExpenseEntries = useMemo(() => {
     if (!activeCycle) {
       return [];
     }
 
-    const start = new Date(activeCycle.startDate).getTime();
-    const end = new Date(activeCycle.endDate).getTime();
-
-    return expenses.filter((expense) => {
-      const purchaseTime = new Date(expense.purchaseDate).getTime();
-      return purchaseTime >= start && purchaseTime <= end;
-    });
+    return expenses.flatMap((expense) =>
+      expense.installments
+        .filter((installment) => installment.financialCycle?.id === activeCycle.id)
+        .map((installment) => ({
+          id: installment.id,
+          title: expense.title,
+          category: expense.category,
+          amount: installment.amount,
+          expenseKind: expense.expenseKind,
+          occurredAt: installment.dueDate,
+          installmentNumber: installment.installmentNumber,
+          installmentsCount: expense.installmentsCount
+        }))
+    );
   }, [activeCycle, expenses]);
 
   const cycleIncome = useMemo(() => {
@@ -122,19 +129,19 @@ export function MonthlyControlPage() {
 
   const cycleTotals = useMemo(
     () => ({
-      totalOut: cycleExpenses.reduce((sum, expense) => sum + expense.amount, 0),
+      totalOut: cycleExpenseEntries.reduce((sum, expense) => sum + expense.amount, 0),
       totalIn: cycleIncome.reduce((sum, entry) => sum + entry.amount, 0),
-      operationalOut: cycleExpenses
+      operationalOut: cycleExpenseEntries
         .filter((expense) => expense.expenseKind === "OPERATIONAL")
         .reduce((sum, expense) => sum + expense.amount, 0),
-      extraordinaryOut: cycleExpenses
+      extraordinaryOut: cycleExpenseEntries
         .filter((expense) => expense.expenseKind === "EXTRAORDINARY")
         .reduce((sum, expense) => sum + expense.amount, 0),
-      patrimonialOut: cycleExpenses
+      patrimonialOut: cycleExpenseEntries
         .filter((expense) => expense.expenseKind === "PATRIMONIAL")
         .reduce((sum, expense) => sum + expense.amount, 0)
     }),
-    [cycleExpenses, cycleIncome]
+    [cycleExpenseEntries, cycleIncome]
   );
 
   const monthlyBudget = useMemo(
@@ -153,7 +160,7 @@ export function MonthlyControlPage() {
   const incomeMarkProgress = (cycleTotals.totalIn / monthlyResultScaleMax) * 100;
   const cycleNetResult = cycleTotals.totalIn - cycleTotals.totalOut;
   const categorySpending = useMemo(() => {
-    const grouped = cycleExpenses.reduce<
+    const grouped = cycleExpenseEntries.reduce<
       Array<{ key: string; label: string; color: string; amount: number }>
     >((accumulator, expense) => {
       const presentation = getCategoryPresentation(expense.category);
@@ -176,17 +183,19 @@ export function MonthlyControlPage() {
     }, []);
 
     return grouped.sort((left, right) => right.amount - left.amount);
-  }, [cycleExpenses]);
+  }, [cycleExpenseEntries]);
 
   const timelineItems = useMemo(() => {
-    const expenseItems = cycleExpenses.map((expense) => ({
+    const expenseItems = cycleExpenseEntries.map((expense) => ({
       id: `expense-${expense.id}`,
       type: "expense" as const,
       title: expense.title,
       category: expense.category,
       amount: expense.amount,
       expenseKind: expense.expenseKind,
-      occurredAt: expense.purchaseDate
+      occurredAt: expense.occurredAt,
+      installmentNumber: expense.installmentNumber,
+      installmentsCount: expense.installmentsCount
     }));
     const incomeItems = cycleIncome.map((entry) => ({
       id: `income-${entry.id}`,
@@ -201,7 +210,7 @@ export function MonthlyControlPage() {
     return [...expenseItems, ...incomeItems].sort(
       (left, right) => new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime()
     );
-  }, [cycleExpenses, cycleIncome]);
+  }, [cycleExpenseEntries, cycleIncome]);
   if (loading && !dashboardData) {
     return <LoadingState />;
   }
@@ -516,6 +525,14 @@ export function MonthlyControlPage() {
                               : item.expenseKind === "PATRIMONIAL"
                                 ? "Patrimonial"
                                 : "Operacional"}
+                          </span>
+                        ) : null}
+                        {"installmentNumber" in item &&
+                        typeof item.installmentNumber === "number" &&
+                        typeof item.installmentsCount === "number" &&
+                        item.installmentsCount > 1 ? (
+                          <span className="inline-flex items-center rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] font-medium text-slate-300">
+                            {item.installmentNumber}/{item.installmentsCount}
                           </span>
                         ) : null}
                         <span className="text-[11px] text-slate-500">{formatDate(item.occurredAt)}</span>

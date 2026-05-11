@@ -16,6 +16,9 @@ export async function listExpenses(request: Request, response: Response) {
       category: true,
       financialCycle: true,
       installments: {
+        include: {
+          financialCycle: true
+        },
         orderBy: { installmentNumber: "asc" }
       }
     },
@@ -66,6 +69,9 @@ export async function createExpense(request: Request, response: Response) {
       where: { id: createdExpense.id },
       include: {
         installments: {
+          include: {
+            financialCycle: true
+          },
           orderBy: { installmentNumber: "asc" }
         },
         category: true,
@@ -131,6 +137,9 @@ export async function updateExpense(request: Request, response: Response) {
       where: { id: existingExpense.id },
       include: {
         installments: {
+          include: {
+            financialCycle: true
+          },
           orderBy: { installmentNumber: "asc" }
         },
         category: true,
